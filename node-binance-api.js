@@ -5686,12 +5686,11 @@ let api = function Binance( options = {} ) {
              * @param {array/string} symbols - an array or string of symbols to query
              * @param {string} interval - the time interval
              * @param {function} callback - callback function
-             * @param {function} opened_callback - the function to call when websocket is opened
              * @return {string} the websocket endpoint
              */
-            candlesticks: function candlesticks( symbols, interval, callback, opened_callback=noop ) {
+            candlesticks: function candlesticks( symbols, interval, callback, handle_websocket_open ) {
                 let reconnect = () => {
-                    if ( Binance.options.reconnect ) candlesticks( symbols, interval, callback, opened_callback);
+                    if ( Binance.options.reconnect ) candlesticks( symbols, interval, callback, handle_websocket_open);
                 };
 
                 /* If an array of symbols are sent we use a combined stream connection rather.
@@ -5703,10 +5702,10 @@ let api = function Binance( options = {} ) {
                     let streams = symbols.map( function ( symbol ) {
                         return symbol.toLowerCase() + '@kline_' + interval;
                     } );
-                    subscription = subscribeCombined( streams, callback, reconnect, opened_callback);
+                    subscription = subscribeCombined( streams, callback, reconnect, handle_websocket_open);
                 } else {
                     let symbol = symbols.toLowerCase();
-                    subscription = subscribe( symbol + '@kline_' + interval, callback, reconnect, opened_callback);
+                    subscription = subscribe( symbol + '@kline_' + interval, callback, reconnect, handle_websocket_open);
                 }
                 return subscription.endpoint;
             },

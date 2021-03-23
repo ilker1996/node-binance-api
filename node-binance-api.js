@@ -4683,7 +4683,7 @@ let api = function Binance( options = {} ) {
          * @return {undefined}
          */
         mgAccount: function( callback ,isIsolated = false) {
-            const endpoint = 'v1/margin' + (isIsolated?'/isolated':'')  + '/account'
+            const endpoint = 'v1/margin' + (isIsolated)?'/isolated':''  + '/account'
             signedRequest( sapi + endpoint, {}, function( error, data ) {
                 if( callback ) return callback( error, data );
             } );
@@ -5688,9 +5688,9 @@ let api = function Binance( options = {} ) {
              * @param {function} callback - callback function
              * @return {string} the websocket endpoint
              */
-            candlesticks: function candlesticks( symbols, interval, callback ) {
+            candlesticks: function candlesticks( symbols, interval, callback, handle_websocket_open ) {
                 let reconnect = () => {
-                    if ( Binance.options.reconnect ) candlesticks( symbols, interval, callback );
+                    if ( Binance.options.reconnect ) candlesticks( symbols, interval, callback, handle_websocket_open);
                 };
 
                 /* If an array of symbols are sent we use a combined stream connection rather.
@@ -5702,10 +5702,10 @@ let api = function Binance( options = {} ) {
                     let streams = symbols.map( function ( symbol ) {
                         return symbol.toLowerCase() + '@kline_' + interval;
                     } );
-                    subscription = subscribeCombined( streams, callback, reconnect );
+                    subscription = subscribeCombined( streams, callback, reconnect, handle_websocket_open);
                 } else {
                     let symbol = symbols.toLowerCase();
-                    subscription = subscribe( symbol + '@kline_' + interval, callback, reconnect );
+                    subscription = subscribe( symbol + '@kline_' + interval, callback, reconnect, handle_websocket_open);
                 }
                 return subscription.endpoint;
             },
